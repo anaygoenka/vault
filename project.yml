@@ -15,32 +15,56 @@ settings:
     SWIFT_APPROACHABLE_CONCURRENCY: YES
     MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
+    # Override with your own team to build: DEVELOPMENT_TEAM=XXXXXXXXXX
     DEVELOPMENT_TEAM: G7CS4NV8PF
     CODE_SIGN_STYLE: Automatic
     ENABLE_HARDENED_RUNTIME: YES
-targets:
-  Vault:
+targetTemplates:
+  VaultApp:
     type: application
     platform: macOS
     sources:
       - path: Vault
+    settings:
+      base:
+        PRODUCT_MODULE_NAME: Vault
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_LSUIElement: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Vault
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
+        INFOPLIST_KEY_NSHumanReadableCopyright: "© 2026 Anay Goenka"
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        COMBINE_HIDPI_IMAGES: YES
+targets:
+  # Mac App Store edition: sandboxed, needs no permissions. Choosing a clip
+  # copies it and you press ⌘V.
+  Vault:
+    templates: [VaultApp]
+    dependencies:
+      - sdk: Carbon.framework
+    settings:
+      base:
+        PRODUCT_NAME: Vault
+        PRODUCT_BUNDLE_IDENTIFIER: com.anaygoenka.Vault
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) APPSTORE"
+        CODE_SIGN_ENTITLEMENTS: Vault/Resources/Vault.entitlements
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_USER_SELECTED_FILES: readonly
+  # Direct-download edition: not sandboxed, pastes for you once
+  # Accessibility is granted through PermissionFlow.
+  Vault Direct:
+    templates: [VaultApp]
     dependencies:
       - package: PermissionFlow
         product: PermissionFlow
       - sdk: Carbon.framework
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.anaygoenka.Vault
-        PRODUCT_NAME: Vault
-        GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_LSUIElement: YES
-        INFOPLIST_KEY_CFBundleDisplayName: Vault
-        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
-        INFOPLIST_KEY_NSHumanReadableCopyright: "© 2026 Anay Goenka"
-        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        PRODUCT_NAME: Vault Direct
+        PRODUCT_BUNDLE_IDENTIFIER: com.anaygoenka.Vault.Direct
         ENABLE_APP_SANDBOX: NO
-        COMBINE_HIDPI_IMAGES: YES
   VaultTests:
     type: bundle.unit-test
     platform: macOS
@@ -54,6 +78,14 @@ targets:
         BUNDLE_LOADER: "$(TEST_HOST)"
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Vault.app/Contents/MacOS/Vault"
 schemes:
+  Vault Direct:
+    build:
+      targets:
+        Vault Direct: all
+    run:
+      config: Debug
+    archive:
+      config: Release
   Vault:
     build:
       targets:

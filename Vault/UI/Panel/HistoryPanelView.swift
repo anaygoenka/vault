@@ -113,7 +113,7 @@ struct HistoryPanelView: View {
 
     private var footer: some View {
         HStack(spacing: 16) {
-            KeyHint(keys: ["↩"], label: settings.pasteAutomatically && PermissionGuide.shared.accessibilityGranted ? "Paste" : "Copy")
+            KeyHint(keys: ["↩"], label: Edition.chooseVerb)
             KeyHint(keys: ["⇧", "↩"], label: settings.plainTextByDefault ? "With formatting" : "Plain text")
             KeyHint(keys: ["⌘", "P"], label: "Pin")
             KeyHint(keys: ["⌘", "⌫"], label: "Delete")
@@ -299,11 +299,14 @@ struct ClipContextMenu: View {
     let model: PanelModel
 
     var body: some View {
-        Button("Paste", systemImage: "doc.on.clipboard") { model.paste(item) }
+        let verb = Edition.chooseVerb
+        Button(verb, systemImage: "doc.on.clipboard") { model.paste(item) }
         if item.kind == .text || item.kind == .link || item.kind == .file {
-            Button("Paste as Plain Text", systemImage: "textformat") { model.paste(item, invertPlain: !AppSettings.shared.plainTextByDefault) }
+            Button("\(verb) as Plain Text", systemImage: "textformat") { model.paste(item, invertPlain: !AppSettings.shared.plainTextByDefault) }
         }
-        Button("Copy", systemImage: "doc.on.doc") { model.copyOnly(item) }
+        if Edition.pastesForYou {
+            Button("Copy", systemImage: "doc.on.doc") { model.copyOnly(item) }
+        }
         Divider()
         Button(item.isPinned ? "Unpin" : "Pin", systemImage: item.isPinned ? "pin.slash" : "pin") { model.togglePin(item) }
         switch item.kind {

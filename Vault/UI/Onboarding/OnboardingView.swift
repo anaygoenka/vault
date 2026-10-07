@@ -16,18 +16,29 @@ struct OnboardingView: View {
         return resume
     }()
     @Bindable private var settings = AppSettings.shared
+    #if !APPSTORE
     private let guide = PermissionGuide.shared
+    #endif
     private let launch = LaunchAtLogin.shared
 
-    private let stepCount = 3
+    private enum Step { case welcome, permission, history }
+
+    #if APPSTORE
+    private let steps: [Step] = [.welcome, .history]
+    #else
+    private let steps: [Step] = [.welcome, .permission, .history]
+    #endif
+
+    private var stepCount: Int { steps.count }
+    private var current: Step { steps[min(step, steps.count - 1)] }
 
     var body: some View {
         VStack(spacing: 0) {
             Group {
-                switch step {
-                case 0: welcome
-                case 1: permission
-                default: history
+                switch current {
+                case .welcome: welcome
+                case .permission: permissionStep
+                case .history: history
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -44,10 +55,12 @@ struct OnboardingView: View {
         .padding(.bottom, 26)
         .frame(width: 520, height: 480)
         .background(backdrop)
+        #if !APPSTORE
         .onAppear { guide.refresh() }
         .onReceive(NotificationCenter.default.publisher(for: .vaultAccessibilityGranted)) { _ in
-            if step == 1, guide.accessibilityGranted { advance() }
+            if current == .permission, guide.accessibilityGranted { advance() }
         }
+        #endif
     }
 
     private var backdrop: some View {
@@ -71,7 +84,9 @@ struct OnboardingView: View {
                 .resizable()
                 .frame(width: 96, height: 96)
                 .shadow(color: .accentColor.opacity(0.3), radius: 20, y: 8)
-            title("Vault", subtitle: "Everything you copy, one shortcut away.")
+            title("Vault", subtitle: Edition.canPasteForYou
+                  ? "Everything you copy, one shortcut away."
+                  : "Everything you copy, one shortcut away. Pick a clip, then press ⌘V.")
                 .padding(.top, 20)
             HStack(spacing: 6) {
                 ForEach(settings.hotKey.symbols, id: \.self) { key in
@@ -86,6 +101,13 @@ struct OnboardingView: View {
         }
     }
 
+    @ViewBuilder private var permissionStep: some View {
+        #if !APPSTORE
+        permission
+        #endif
+    }
+
+    #if !APPSTORE
     private var permission: some View {
         VStack(spacing: 0) {
             StepIcon(
@@ -122,6 +144,8 @@ struct OnboardingView: View {
         .animation(.snappy, value: guide.needsRelaunch)
     }
 
+    #endif
+
     private var history: some View {
         VStack(spacing: 0) {
             StepIcon(symbol: "clock", tint: .accentColor)
@@ -139,7 +163,18 @@ struct OnboardingView: View {
 
     // MARK: - Pieces
 
+    #if !APPSTORE
     private var permissionDone: Bool { guide.accessibilityGranted || guide.needsRelaunch }
+    #endif
+
+    /// On the permission step, "Not Now" replaces Continue until granted.
+    private var waitingOnPermission: Bool {
+        #if APPSTORE
+        return false
+        #else
+        return current == .permission && !guide.accessibilityGranted
+        #endif
+    }
 
     private func title(_ text: String, subtitle: String) -> some View {
         VStack(spacing: 8) {
@@ -173,7 +208,7 @@ struct OnboardingView: View {
                     .foregroundStyle(.secondary)
                     .padding(.trailing, 10)
             }
-            if step == 1, !guide.accessibilityGranted {
+            if waitingOnPermission {
                 Button("Not Now") { advance() }
                     .buttonStyle(.glass)
                     .controlSize(.large)
@@ -186,10 +221,12 @@ struct OnboardingView: View {
         }
     }
 
+    #if !APPSTORE
     private func restartForGrant() {
         UserDefaults.standard.set(2, forKey: "onboardingResumeStep")
         guide.relaunch()
     }
+    #endif
 
     private func advance() {
         if step < stepCount - 1 {

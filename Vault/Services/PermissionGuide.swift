@@ -17,6 +17,7 @@
 //  the prompt option puts a second, competing dialog on top of the pane.
 //
 
+#if !APPSTORE
 import AppKit
 import ApplicationServices
 import Observation
@@ -153,14 +154,16 @@ final class PermissionGuide {
     /// grant to a new process.
     func relaunch() {
         UserDefaults.standard.synchronize()
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/bin/sh")
-        task.arguments = ["-c", "sleep 0.6; /usr/bin/open \"$0\"", Bundle.main.bundlePath]
-        try? task.run()
-        NSApp.terminate(nil)
+        let config = NSWorkspace.OpenConfiguration()
+        config.createsNewApplicationInstance = true
+        config.activates = true
+        NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: config) { _, _ in
+            DispatchQueue.main.async { NSApp.terminate(nil) }
+        }
     }
 }
 
 extension Notification.Name {
     static let vaultAccessibilityGranted = Notification.Name("VaultAccessibilityGranted")
 }
+#endif

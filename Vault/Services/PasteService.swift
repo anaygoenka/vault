@@ -59,11 +59,16 @@ enum PasteService {
     static func paste(_ item: ClipItem, plainText: Bool) -> Outcome {
         copy(item, plainText: plainText)
         HistoryStore.shared.markUsed(item.id)
+        #if APPSTORE
+        return .copied
+        #else
         guard AppSettings.shared.pasteAutomatically, AXIsProcessTrusted() else { return .copied }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.06) { postCommandV() }
         return .pasted
+        #endif
     }
 
+    #if !APPSTORE
     private static func postCommandV() {
         let source = CGEventSource(stateID: .combinedSessionState)
         let key = CGKeyCode(kVK_ANSI_V)
@@ -76,4 +81,5 @@ enum PasteService {
         down?.post(tap: .cgSessionEventTap)
         up?.post(tap: .cgSessionEventTap)
     }
+    #endif
 }

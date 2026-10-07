@@ -12,7 +12,9 @@ struct SettingsView: View {
             Tab("General", systemImage: "gearshape") { GeneralSettings() }
             Tab("History", systemImage: "clock.arrow.circlepath") { HistorySettings() }
             Tab("Privacy", systemImage: "hand.raised") { PrivacySettings() }
+            #if !APPSTORE
             Tab("Permissions", systemImage: "lock.shield") { PermissionSettings() }
+            #endif
         }
         .frame(width: 620, height: 560)
     }
@@ -55,13 +57,15 @@ private struct GeneralSettings: View {
                 }
             }
 
-            Section("Pasting") {
+            Section(Edition.canPasteForYou ? "Pasting" : "Copying") {
+                #if !APPSTORE
                 Toggle(isOn: $settings.pasteAutomatically) {
                     Text("Paste into the current app")
                     Text("Choosing a clip pastes it where your cursor is. When off, Vault copies it and you press ⌘V.")
                 }
+                #endif
                 Toggle(isOn: $settings.plainTextByDefault) {
-                    Text("Paste as plain text by default")
+                    Text(Edition.canPasteForYou ? "Paste as plain text by default" : "Copy as plain text by default")
                     Text("Strips fonts and colours. Hold ⇧ when choosing a clip to do the opposite.")
                 }
                 Toggle("Move clips to the top when reused", isOn: $settings.moveReusedToTop)
@@ -367,6 +371,8 @@ private struct PauseControl: View {
 
 // MARK: - Permissions
 
+#if !APPSTORE
+
 private struct PermissionSettings: View {
     private let guide = PermissionGuide.shared
 
@@ -437,3 +443,4 @@ struct PermissionCard: View {
         .animation(.snappy, value: guide.needsRelaunch)
     }
 }
+#endif

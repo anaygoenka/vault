@@ -20,9 +20,16 @@ enum DebugSnapshot {
                       let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { continue }
                 view.cacheDisplay(in: view.bounds, to: rep)
                 let name = window.identifier?.rawValue ?? "window\(n)"
-                try? rep.representation(using: .png, properties: [:])?.write(to: dir.appendingPathComponent("\(name).png"))
+                guard let png = rep.representation(using: .png, properties: [:]) else { continue }
+                if (try? png.write(to: dir.appendingPathComponent("\(name).png"))) == nil, name == "panel" {
+                    // Sandboxed builds cannot write outside their container;
+                    // hand the panel over on the clipboard instead.
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setData(png, forType: .png)
+                }
             }
         }
     }
 }
 #endif
+

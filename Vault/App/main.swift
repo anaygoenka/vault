@@ -11,9 +11,11 @@
 import AppKit
 import ApplicationServices
 
+#if !APPSTORE
 if CommandLine.arguments.contains("--check-accessibility") {
     print(AXIsProcessTrusted() ? "granted" : "denied")
     exit(0)
 }
+#endif
 
 VaultApp.main()

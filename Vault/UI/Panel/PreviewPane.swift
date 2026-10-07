@@ -49,7 +49,9 @@ struct PreviewPane: View {
                 case .image: action("eye", help: "Open in Preview (⌘O)") { model.open(item) }
                 default: EmptyView()
                 }
-                action("doc.on.doc", help: "Copy without pasting (⌥↩)") { model.copyOnly(item) }
+                if Edition.pastesForYou {
+                    action("doc.on.doc", help: "Copy without pasting (⌥↩)") { model.copyOnly(item) }
+                }
                 action("trash", help: "Delete (⌘⌫)") { model.delete(item) }
             }
             Button {
@@ -64,7 +66,7 @@ struct PreviewPane: View {
     }
 
     private var pasteLabel: String {
-        AppSettings.shared.pasteAutomatically && PermissionGuide.shared.accessibilityGranted ? "Paste" : "Copy"
+        Edition.chooseVerb
     }
 
     private func action(_ symbol: String, help: String, perform: @escaping () -> Void) -> some View {
@@ -244,11 +246,6 @@ private struct FilePreview: View {
                         }
                         .lineLimit(1)
                         Spacer()
-                        if !FileManager.default.fileExists(atPath: path) {
-                            Text("Missing")
-                                .font(.system(size: 10.5, weight: .semibold))
-                                .foregroundStyle(.orange)
-                        }
                     }
                 }
             }
