@@ -27,6 +27,7 @@ final class PanelController: NSObject, NSWindowDelegate {
     static let size = NSSize(width: 800, height: 520)
 
     var isVisible: Bool { panel?.isVisible ?? false }
+    var window: NSWindow? { panel }
 
     override private init() {
         super.init()
@@ -52,6 +53,20 @@ final class PanelController: NSObject, NSWindowDelegate {
         }
         installMonitors()
     }
+
+    #if DEBUG
+    /// Shows the panel for a screenshot without taking focus, at `level`.
+    func showForCapture(level: NSWindow.Level) {
+        let panel = panel ?? makePanel()
+        self.panel = panel
+        panel.delegate = nil
+        model.prepareForPresentation()
+        position(panel)
+        panel.level = level
+        panel.alphaValue = 1
+        panel.orderFrontRegardless()
+    }
+    #endif
 
     func hide() {
         guard let panel, panel.isVisible else { return }

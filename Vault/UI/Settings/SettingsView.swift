@@ -7,13 +7,17 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct SettingsView: View {
+    /// The tab Settings opens on.
+    static var initialTab = "general"
+    @State private var tab = SettingsView.initialTab
+
     var body: some View {
-        TabView {
-            Tab("General", systemImage: "gearshape") { GeneralSettings() }
-            Tab("History", systemImage: "clock.arrow.circlepath") { HistorySettings() }
-            Tab("Privacy", systemImage: "hand.raised") { PrivacySettings() }
+        TabView(selection: $tab) {
+            Tab("General", systemImage: "gearshape", value: "general") { GeneralSettings() }
+            Tab("History", systemImage: "clock.arrow.circlepath", value: "history") { HistorySettings() }
+            Tab("Privacy", systemImage: "hand.raised", value: "privacy") { PrivacySettings() }
             #if !APPSTORE
-            Tab("Permissions", systemImage: "lock.shield") { PermissionSettings() }
+            Tab("Permissions", systemImage: "lock.shield", value: "permissions") { PermissionSettings() }
             #endif
         }
         .frame(width: 620, height: 560)

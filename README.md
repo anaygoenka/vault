@@ -16,6 +16,10 @@ A Liquid Glass clipboard manager for macOS. Everything you copy, one <kbd>⇧</k
 
 [Features](#features) · [Editions](#two-editions) · [Install](#install) · [Shortcuts](#keyboard-shortcuts) · [Build](#build-from-source) · [Privacy](#privacy)
 
+<br>
+
+<img src="docs/01-history.jpg" alt="The Vault panel showing clipboard history with a code snippet previewed" width="860">
+
 </div>
 
 ---
@@ -37,6 +41,11 @@ macOS remembers exactly one thing you copied. Vault remembers all of them: the l
 | **Private by default** | Skips passwords and one-time codes from password managers, ignores apps you choose, and pauses on request. |
 | **Fully keyboard-driven** | Arrows to move, <kbd>⌘</kbd><kbd>1</kbd> to <kbd>⌘</kbd><kbd>9</kbd> to pick, <kbd>⇥</kbd> to filter, <kbd>⎋</kbd> to close. |
 | **Native through and through** | SwiftUI with Liquid Glass, SF Symbols, light and dark mode, and no Electron or web views. |
+
+<p align="center">
+  <img src="docs/02-colour.jpg" alt="A copied colour shown as a swatch with HEX, RGB and HSL values" width="420">
+  <img src="docs/04-settings.jpg" alt="History settings with retention from one hour to forever" width="420">
+</p>
 
 ## Two editions
 

@@ -41,6 +41,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Launch flags for checking the windows without a key press.
         let args = ProcessInfo.processInfo.arguments
         DebugSnapshot.scheduleIfRequested()
+        if MarketingShots.runIfRequested() { return }
         if args.contains("--show-panel") { DispatchQueue.main.asyncAfter(deadline: .now() + 1) { PanelController.shared.show() }; return }
         if args.contains("--show-settings") { Self.openSettings(); return }
         if args.contains("--show-onboarding") { Self.openOnboarding(); return }
