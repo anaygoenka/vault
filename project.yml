@@ -1,0 +1,68 @@
+name: Vault
+options:
+  bundleIdPrefix: com.anaygoenka
+  deploymentTarget:
+    macOS: "26.0"
+  createIntermediateGroups: true
+packages:
+  PermissionFlow:
+    url: https://github.com/jaywcjlove/PermissionFlow.git
+    from: 2.11.3
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+    SWIFT_APPROACHABLE_CONCURRENCY: YES
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: G7CS4NV8PF
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_HARDENED_RUNTIME: YES
+targets:
+  Vault:
+    type: application
+    platform: macOS
+    sources:
+      - path: Vault
+    dependencies:
+      - package: PermissionFlow
+        product: PermissionFlow
+      - sdk: Carbon.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.anaygoenka.Vault
+        PRODUCT_NAME: Vault
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_LSUIElement: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Vault
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
+        INFOPLIST_KEY_NSHumanReadableCopyright: "© 2026 Anay Goenka"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        ENABLE_APP_SANDBOX: NO
+        COMBINE_HIDPI_IMAGES: YES
+  VaultTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: VaultTests
+    dependencies:
+      - target: Vault
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Vault.app/Contents/MacOS/Vault"
+schemes:
+  Vault:
+    build:
+      targets:
+        Vault: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - VaultTests
+    archive:
+      config: Release
